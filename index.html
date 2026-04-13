@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ჩემი მუნიციპალიტეტი - პორტალი</title>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* მუნიციპალური ლურჯი */
+            --secondary-color: #27ae60; /* წარმატების მწვანე */
+            --bg-color: #ecf0f1;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* ჰედერი და ლოგო */
+        header {
+            background-color: white;
+            width: 100%;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            /* შეგიძლია ჩასვა რეალური ლოგოს URL svg format-ში უკეთესია*/
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e0/Coat_of_arms_of_Georgia.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        /* მთავარი კონტეინერი */
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin-top: 100px; /* ჰედერის გამო */
+            margin-bottom: 50px;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--secondary-color);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        /* ფორმის ელემენტები */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"], select, textarea, input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* ფოტოს პრევვიუ (Preview) */
+        #imagePreviewContainer {
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* ღილაკი */
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+        }
+
+        button:hover {
+            background-color: #219150;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* სტატუსის მესიჯი */
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 1.2em;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Loading სპინერი ანიმაციისთვის */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo"></div>
+    <h1>თერჯოლის მუნიციპალიტეტი</h1>
+</header>
+
+<div class="container" data-aos="fade-up">
+    <h2>პრობლემის დაფიქსირება</h2>
+    
+    <form id="issueForm">
+        <div class="form-group">
+            <label for="category">პრობლემის ტიპი</label>
+            <select id="category" required>
+                <option value="" disabled selected>აირჩიეთ კატეგორია...</option>
+                <option value="გზები და ტროტუარები">გზები და ტროტუარები</option>
+                <option value="გარე განათება">გარე განათება</option>
+                <option value="დასუფთავება">დასუფთავება/ნაგავი</option>
+                <option value="გამწვანება">გამწვანება/პარკები</option>
+                <option value="სხვა">სხვა</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="address">ზუსტი მისამართი ან ლოკაცია</label>
+            <input type="text" id="address" placeholder="მაგ: რუსთაველის ქ. 15 ან სოფ. სიქთარვა" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">აღწერა</label>
+            <textarea id="description" rows="4" placeholder="მოკლედ აღწერეთ პრობლემა..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="image">ატვირთეთ ფოტო (თუ გაქვთ)</label>
+            <input type="file" id="image" accept="image/*">
+            <div id="imagePreviewContainer">
+                <img src="" alt="პრევვიუ" id="imagePreview">
+            </div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+            <span id="btnText">გაგზავნა</span>
+            <div class="spinner" id="btnSpinner"></div>
+        </button>
+    </form>
+    
+    <div id="message"></div>
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 800, once: true }); // ინიციალიზაცია
+
+    // აქ ჩასვი შენი Apps Script-ის Web App URL
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_aRb4NYJNGkYM1BBtUm5OLQbU5rqMjMOekuO9RZV_XXpGSzx2kH3s7j2UaVLnltGJ/exec'; 
+
+    const fileInput = document.getElementById('image');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const previewImage = document.getElementById('imagePreview');
+    let base64Image = "";
+    let imageName = "";
+
+    // ფოტოს პრევვიუს ლოგიკა
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                previewContainer.style.display = 'block';
+                base64Image = event.target.result; // ინახავს base64 სტრინგს
+                imageName = file.name;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = 'none';
+            base64Image = "";
+            imageName = "";
+        }
+    });
+
+    // ფორმის გაგზავნის ლოგიკა
+    document.getElementById('issueForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const messageDiv = document.getElementById('message');
+
+        // Loading-ის ჩართვა
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'block';
+        messageDiv.innerText = '';
+        messageDiv.style.background = 'none';
+
+        const formData = {
+            category: document.getElementById('category').value,
+            address: document.getElementById('address').value,
+            description: document.getElementById('description').value,
+            image: base64Image, // base64 ფოტო
+            imageName: imageName
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // მნიშვნელოვანია CORS-ისთვის
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            // წარმატების ვიზუალური ეფექტები
+            messageDiv.style.color = '#155724';
+            messageDiv.style.background = '#d4edda';
+            messageDiv.innerText = 'თქვენი განაცხადი წარმატებით დარეგისტრირდა. მადლობა თანამშრომლობისთვის!';
+            document.getElementById('issueForm').reset();
+            previewContainer.style.display = 'none';
+            base64Image = "";
+            imageName = "";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            messageDiv.style.color = '#721c24';
+            messageDiv.style.background = '#f8d7da';
+            messageDiv.innerText = 'დაფიქსირდა შეცდომა. გთხოვთ, სცადოთ მოგვიანებით.';
+        })
+        .finally(() => {
+            // Loading-ის გამორთვა
+            submitBtn.disabled = false;
+            btnText.style.display = 'block';
+            btnSpinner.style.display = 'none';
+        });
+    });
+</script>
+
+</body>
+</html>
